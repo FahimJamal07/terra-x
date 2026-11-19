@@ -8,7 +8,7 @@
 namespace {
 
 constexpr uint32_t request_interval_ms = 1000;
-constexpr uint32_t response_timeout_ms = 500;
+constexpr uint32_t response_timeout_ms = 1500;
 constexpr size_t response_capacity = 256;
 constexpr size_t modbus_response_length = 13;
 
@@ -41,7 +41,8 @@ size_t findModbusResponse(const uint8_t* bytes, size_t length) {
         return response_capacity;
     }
     for (size_t index = 0; index + modbus_response_length <= length; ++index) {
-        if (bytes[index] == 0x01 && bytes[index + 1] == 0x03 && bytes[index + 2] == 0x08) {
+        if (bytes[index] == config::soil::modbus_address &&
+            bytes[index + 1] == 0x03 && bytes[index + 2] == 0x08) {
             return index;
         }
     }
@@ -63,10 +64,15 @@ void SoilSensor::begin(SoilRs485& transport) {
     responseLength_ = 0;
     requested_ = false;
     requestInProgress_ = false;
+    active_ = false;
+    activatedAt_ = 0;
 }
 
 void SoilSensor::update() {
-    if (transport_ == nullptr) {
+    if (transport_ == nullptr || !active_) {
+        return;
+    }
+    if (millis() - activatedAt_ < config::soil::reading_delay_ms) {
         return;
     }
 
@@ -101,12 +107,21 @@ void SoilSensor::update() {
 }
 
 void SoilSensor::deactivate() {
+    active_ = false;
+    activatedAt_ = 0;
     if (!requestInProgress_) {
         return;
     }
     requestInProgress_ = false;
     responseLength_ = 0;
     transport_->clearInput();
+}
+
+void SoilSensor::activate() {
+    if (!active_) {
+        activatedAt_ = millis();
+        active_ = true;
+    }
 }
 
 void SoilSensor::startRequest() {

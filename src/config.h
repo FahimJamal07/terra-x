@@ -17,10 +17,10 @@ constexpr uint32_t command_timeout_ms = 600;
 }  // namespace rover
 
 namespace actuator {
-constexpr uint8_t ain1 = 16;
-constexpr uint8_t ain2 = 17;
-constexpr uint8_t pwma = 32;
-constexpr uint8_t stby = 12;
+constexpr uint8_t in3 = 12;
+constexpr uint8_t in4 = 17;
+constexpr uint8_t enb = 32;
+constexpr uint8_t speed_default = 50;
 constexpr uint32_t command_timeout_ms = 600;
 }  // namespace actuator
 
@@ -37,6 +37,7 @@ constexpr uint8_t uart_tx = 14;
 constexpr uint8_t de_re = 4;
 constexpr uint32_t baud = 4800;
 constexpr uint8_t modbus_address = 1;
+constexpr uint32_t reading_delay_ms = 1000;
 }  // namespace soil
 
 namespace sensors {

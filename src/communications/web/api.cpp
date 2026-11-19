@@ -185,6 +185,10 @@ bool validSpeed(int speed) {
 	return speed >= config::navigation::minimum_speed && speed <= config::rover::speed_maximum;
 }
 
+bool validActuatorSpeed(int speed) {
+	return speed >= config::rover::speed_minimum && speed <= config::rover::speed_maximum;
+}
+
 }  // namespace
 
 void Api::begin(WebService& webService, System& system) {
@@ -241,6 +245,7 @@ void Api::handleTelemetry() {
 	webService_->logRequest();
 	const GPSData gps = system_->gpsSensor().getData();
 	const SoilData soil = system_->soilSensor().getData();
+	const bool soilValid = soil.valid && system_->soilSensor().isHealthy();
 	const SystemStatus& status = system_->state().status();
 	String response = "{\"gps\":{\"latitude\":";
 	response += String(gps.latitude, 6);
@@ -266,7 +271,7 @@ void Api::handleTelemetry() {
 	response += system_->soilSensor().status();
 	response += "\"";
 	response += ",\"valid\":";
-	response += soil.valid ? "true" : "false";
+	response += soilValid ? "true" : "false";
 	response += "},\"system\":{\"operatingMode\":\"";
 	response += operatingModeName(status.operatingMode);
 	response += "\",\"roverState\":\"";
@@ -370,8 +375,8 @@ void Api::handleActuator() {
 	}
 	int speed = 0;
 	if (jsonNumber(body, "speed", speed)) {
-		if (!validSpeed(speed)) {
-			sendError(server, 400, "speed must be between 171 and 255");
+		if (!validActuatorSpeed(speed)) {
+			sendError(server, 400, "actuator speed must be between 0 and 255");
 			return;
 		}
 		system_->actuatorController().setSpeed(static_cast<uint8_t>(speed));

@@ -41,10 +41,13 @@ void System::update() {
     roverController_.update();
     actuatorController_.update();
     gpsSensor_.update();
-    if (config::soil::enabled && actuatorController_.getState() == ActuatorState::Down) {
-        soilSensor_.update();
-    } else if (config::soil::enabled) {
-        soilSensor_.deactivate();
+    if (config::soil::enabled) {
+        if (actuatorController_.getState() == ActuatorState::Down) {
+            soilSensor_.activate();
+            soilSensor_.update();
+        } else {
+            soilSensor_.deactivate();
+        }
     }
     samplingController_.update();
     if (!samplingController_.isActive()) {
@@ -67,8 +70,7 @@ void System::update() {
     }
     SystemStatus status = state_.status();
     status.gpsStatus = gpsSensor_.isHealthy();
-    status.soilStatus = actuatorController_.getState() == ActuatorState::Down &&
-                        soilSensor_.isHealthy();
+    status.soilStatus = soilSensor_.isHealthy();
     status.driveDirection = roverController_.getDirection();
     status.actuatorState = actuatorController_.getState();
     status.roverSpeed = roverController_.getSpeed();

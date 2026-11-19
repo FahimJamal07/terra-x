@@ -37,9 +37,13 @@ size_t SoilRs485::read(uint8_t* buffer, size_t length) {
 
 size_t SoilRs485::write(const uint8_t* buffer, size_t length) {
     digitalWrite(config::soil::de_re, HIGH);
+    Serial.println("SOIL: MAX485 TX MODE");
+    delayMicroseconds(50);
     const size_t written = serial_.write(buffer, length);
     serial_.flush();
+    delayMicroseconds(50);
     digitalWrite(config::soil::de_re, LOW);
+    Serial.println("SOIL: MAX485 RX MODE");
     return written;
 }
 

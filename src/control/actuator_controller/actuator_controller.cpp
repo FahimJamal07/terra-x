@@ -5,7 +5,7 @@
 void ActuatorController::begin(TB6612& driver, Safety& safety) {
     driver_ = &driver;
     safety_ = &safety;
-    speed_ = config::rover::speed_default;
+    speed_ = config::actuator::speed_default;
     state_ = ActuatorState::Stopped;
     driver_->stop();
 }

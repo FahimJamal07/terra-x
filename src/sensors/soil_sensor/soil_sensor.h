@@ -8,6 +8,7 @@ public:
     void begin(SoilRs485& transport);
     void update();
     void deactivate();
+    void activate();
     SoilData getData() const;
     SoilData data() const;
     bool isHealthy() const;
@@ -27,4 +28,6 @@ private:
     uint8_t response_[responseCapacity] = {};
     bool requested_ = false;
     bool requestInProgress_ = false;
+    bool active_ = false;
+    uint32_t activatedAt_ = 0;
 };
